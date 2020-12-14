@@ -1,0 +1,97 @@
+import requests
+
+OKEx_endpoint = 'https://www.okex.com'
+Huobi_endpoint = 'https://api.hbdm.com'
+Binance_USD_endpoint = 'https://dapi.binance.com'
+Binance_USDT_endpoint = 'https://fapi.binance.com'
+symbol_list = ['BTC', 'LTC', 'ETH', 'ETC', 'XRP', 'EOS', 'BCH', 'BSV', 'TRX', 'DOT', 'LINK', 'ZEN', 'ADA', 'ALGO', 'ANT', 'ATOM', 'AVAX', 'BAL', 'BAND', 'BAT', 'BTM', 'BTT', 'COMP', 'CRV', 'DASH', 'DOGE', 'FIL', 'FLM', 'IOST', 'IOTA', 'JST', 'KNC', 'KSM', 'LRC', 'MKR', 'NEO', 'OMG', 'ONT', 'QTUM', 'REN', 'RSR', 'SNX', 'SRM', 'STORJ', 'SUN', 'SUSHI', 'SWRV', 'THETA', 'TRB', 'UMA', 'UNI', 'WAVES', 'WNXM', 'XLM', 'XMR', 'XTZ', 'YFI', 'YFII', 'ZEC', 'ZIL', 'ZRX']
+
+
+symbol = input("Please enter a symbol (BTC, LTC, ETH, ect.) or type ALL for all available swaps:\n")
+symbol = symbol.upper()
+
+def Open_Interest(symbol):
+    #OKex
+    print('\nOKEx:')
+
+    endpoint = OKEx_endpoint+'/api/swap/v3/instruments/'+symbol+'-USD-SWAP/open_interest'
+    result = requests.get(endpoint)
+    if result.status_code == 200:
+        amount = result.json()['amount']
+        print(symbol+'-USD: ',amount)
+    else:
+        print('No response for',symbol+'-USD')
+
+    endpoint = OKEx_endpoint+'/api/swap/v3/instruments/'+symbol+'-USDT-SWAP/open_interest'
+    result = requests.get(endpoint)
+    if result.status_code == 200:
+        amount = result.json()['amount']
+        print(symbol+'-USDT: ',amount)
+    else:
+        print('No response for',symbol+'-USDT')
+
+
+    #Huobi
+    print('\nHuobi:')
+
+    endpoint = Huobi_endpoint+'/swap-api/v1/swap_open_interest?contract_code='+symbol+'-USD'
+    result = requests.get(endpoint)
+    if result.json()['status'] == 'ok':
+        data = result.json()["data"]
+        data = str(data[0])
+        ext = "sym"
+        amount = data[:data.find(ext) - len(ext)]
+        x = amount.find('amount')
+        x += 9
+        amount = amount[x:]
+        print(symbol+'-USD: ',amount)
+    else:
+        print('No response for',symbol+'-USD')
+
+    endpoint = Huobi_endpoint+'/linear-swap-api/v1/swap_open_interest?contract_code='+symbol+'-USDT'
+    result = requests.get(endpoint)
+    if result.json()['status'] == 'ok':
+        data = result.json()["data"]
+        data = str(data[0])
+        ext = "sym"
+        amount = data[:data.find(ext) - len(ext)]
+        x = amount.find('amount')
+        x += 9
+        amount = amount[x:]
+        print(symbol+'-USDT: ',amount)
+    else:
+        print('No response for',symbol+'-USDT')
+
+
+    #Binance
+    print('\nBinance:')
+
+    endpoint = Binance_USD_endpoint+'/dapi/v1/openInterest?symbol='+symbol+'USD_PERP'
+    result = requests.get(endpoint)
+    if result.status_code == 200:
+        amount = result.json()['openInterest']
+        print(symbol+'-USD: ',amount)
+    else:
+        print('No response for',symbol+'-USD')
+
+    endpoint = Binance_USDT_endpoint+'/fapi/v1/openInterest?symbol='+symbol+'USDT'
+    result = requests.get(endpoint)
+    if result.status_code == 200:
+        amount = result.json()['openInterest']
+        print(symbol+'-USDT: ',amount,'\n')
+    else:
+        print('No response for',symbol+'-USDT\n')
+
+#executes function
+if symbol == "ALL":
+    count = 0
+    while count < len(symbol_list):
+        symbol = symbol_list[count]
+        print("\n   OPEN INTEREST:")
+        Open_Interest(symbol)
+        count += 1
+else:
+    print("\n   OPEN INTEREST:")
+    Open_Interest(symbol)
+    
+
